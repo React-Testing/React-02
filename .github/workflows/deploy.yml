@@ -30,7 +30,7 @@ jobs:
           echo "📦 Step 2: Install and run backend temporarily"
           cd /home/hostapp/temp_mern_deploy/backend
           npm install
-          pm2 start server.js --name temp-mern-backend
+          PORT=5001 pm2 start server.js --name temp-mern-backend --env production
           sleep 5
 
           echo "🔎 Step 3: Check if backend is running"
