@@ -67,7 +67,7 @@ jobs:
           pm2 start server.js --name mern-backend
 
           echo "🌐 Step 8: Deploy frontend to Nginx root"
-          rm -rf /opt/day07/*
+          sudo rm -rf /opt/day07/*
           cp -r /home/hostapp/React-02/frontend/dist/* /opt/day07/
 
           echo "🔁 Step 9: Restart Nginx"
