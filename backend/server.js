@@ -1,4 +1,4 @@
-const express = require('express');
+// const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
 require('dotenv').config();
@@ -25,7 +25,7 @@ app.get('/api/users', async (req, res) => {
 
 app.post('/api/users', async (req, res) => {
   const { name, email } = req.body;
-  const newUser100 = new User({ name, email });
+  const newUser = new User({ name, email });
   await newUser.save();
   res.json(newUser);
 });
