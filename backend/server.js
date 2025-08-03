@@ -42,8 +42,14 @@ app.delete('/api/users/:id', async (req, res) => {
 });
 
 // ✅ Add this test route for CI/CD health check
-app.get('/api/test', (req, res) => {
-  res.status(200).json({ message: 'Backend is up!' });
+app.get('/api/test', async (req, res) => {
+  const dbStatus = mongoose.connection.readyState;
+
+  if (dbStatus === 1) {
+    res.status(200).json({ message: '✅ Backend and DB are up!' });
+  } else {
+    res.status(500).json({ message: '❌ Backend OK but DB not connected' });
+  }
 });
 
 app.listen(process.env.PORT || 5000, () => {
