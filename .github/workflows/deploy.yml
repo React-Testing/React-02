@@ -10,7 +10,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - name: Checkout Code
+    - name: Checkout code
       uses: actions/checkout@v3
 
     - name: Deploy to Ubuntu Server via SSH
@@ -21,11 +21,11 @@ jobs:
         key: ${{ secrets.SERVER_SSH_KEY }}
         script: |
           echo "📁 Step 1: Create temp folder and clone"
-          rm -rf /home/hostapp/temp_deploy
-          git clone https://github.com/React-Testing/React-02.git /home/hostapp/temp_deploy
+          rm -rf /home/hostapp/temp_mern_deploy
+          git clone git@github.com:React-Testing/React-02.git /home/hostapp/temp_mern_deploy
 
           echo "📦 Step 2: Install and run backend temporarily"
-          cd /home/hostapp/temp_deploy/backend
+          cd /home/hostapp/temp_mern_deploy/backend
           npm install
           pm2 start server.js --name temp-mern-backend
           sleep 5
@@ -33,7 +33,7 @@ jobs:
           echo "🔎 Step 3: Check if backend is running"
           BACKEND_STATUS=$(curl -s -o /dev/null -w "%{http_code}" http://localhost:5000/api/test)
           if [ "$BACKEND_STATUS" -ge 200 ] && [ "$BACKEND_STATUS" -lt 400 ]; then
-            echo "✅ Backend is running fine"
+            echo "✅ Backend is running fine (HTTP $BACKEND_STATUS)"
           else
             echo "❌ Backend check failed with code $BACKEND_STATUS"
             pm2 delete temp-mern-backend
@@ -41,7 +41,7 @@ jobs:
           fi
 
           echo "🛠 Step 4: Build frontend"
-          cd /home/hostapp/temp_deploy/frontend
+          cd /home/hostapp/temp_mern_deploy/frontend
           npm install
           npm run build
 
@@ -56,9 +56,9 @@ jobs:
           mv /home/hostapp/React-02 /home/hostapp/backup_React-02_$TIMESTAMP
 
           echo "📂 Step 6: Deploy new code"
-          mv /home/hostapp/temp_deploy /home/hostapp/React-02
+          mv /home/hostapp/temp_mern_deploy /home/hostapp/React-02
 
-          echo "🔥 Step 7: Clean temp PM2 and restart real backend"
+          echo "🔥 Step 7: Restart backend"
           pm2 delete temp-mern-backend
           cd /home/hostapp/React-02/backend
           pm2 start server.js --name mern-backend
