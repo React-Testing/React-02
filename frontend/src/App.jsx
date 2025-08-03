@@ -1,6 +1,6 @@
 // frontend/src/App.jsx
 import { useEffect, useState } from 'react';
-import axios from 'axios';
+import axios from 'axiosnnnn';
 
 const API = import.meta.env.VITE_API_BASE_URL;
 
