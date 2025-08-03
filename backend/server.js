@@ -1,4 +1,3 @@
-// backend/server.js
 const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
@@ -17,6 +16,11 @@ mongoose.connect(process.env.MONGO_URI, {
 })
 .then(() => console.log("MongoDB connected"))
 .catch(err => console.log(err));
+
+// Health check route for CI/CD
+app.get('/api/test', (req, res) => {
+  res.json({ status: "OK", message: "Backend is running" });
+});
 
 // Routes
 app.get('/api/users', async (req, res) => {
