@@ -34,7 +34,7 @@ jobs:
           sleep 5
 
           echo "🔎 Step 3: Check if backend is running"
-          BACKEND_STATUS=$(curl -s -o /dev/null -w "%{http_code}" http://localhost:5000/api/test)
+          BACKEND_STATUS=$(curl -s -o /dev/null -w "%{http_code}" http://localhost:5001/api/test)
           if [ "$BACKEND_STATUS" -ge 200 ] && [ "$BACKEND_STATUS" -lt 400 ]; then
             echo "✅ Backend is running fine (HTTP $BACKEND_STATUS)"
           else
