@@ -1,1 +1,73 @@
-a
+name: Safe MERN Deployment
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout Code
+      uses: actions/checkout@v3
+
+    - name: Deploy to Ubuntu Server via SSH
+      uses: appleboy/ssh-action@v1.0.0
+      with:
+        host: ${{ secrets.SERVER_IP }}
+        username: ${{ secrets.SERVER_USER }}
+        key: ${{ secrets.SERVER_SSH_KEY }}
+        script: |
+          echo "📁 Step 1: Create temp folder and clone"
+          rm -rf /home/hostapp/temp_deploy
+          git clone https://github.com/React-Testing/React-02.git /home/hostapp/temp_deploy
+
+          echo "📦 Step 2: Install and run backend temporarily"
+          cd /home/hostapp/temp_deploy/backend
+          npm install
+          pm2 start server.js --name temp-mern-backend
+          sleep 5
+
+          echo "🔎 Step 3: Check if backend is running"
+          BACKEND_STATUS=$(curl -s -o /dev/null -w "%{http_code}" http://localhost:5000/api/test)
+          if [ "$BACKEND_STATUS" -ge 200 ] && [ "$BACKEND_STATUS" -lt 400 ]; then
+            echo "✅ Backend is running fine"
+          else
+            echo "❌ Backend check failed with code $BACKEND_STATUS"
+            pm2 delete temp-mern-backend
+            exit 1
+          fi
+
+          echo "🛠 Step 4: Build frontend"
+          cd /home/hostapp/temp_deploy/frontend
+          npm install
+          npm run build
+
+          if [ ! -f dist/index.html ]; then
+            echo "❌ Frontend build failed"
+            pm2 delete temp-mern-backend
+            exit 1
+          fi
+
+          echo "🗂 Step 5: Backup current project"
+          TIMESTAMP=$(date +%Y%m%d%H%M%S)
+          mv /home/hostapp/React-02 /home/hostapp/backup_React-02_$TIMESTAMP
+
+          echo "📂 Step 6: Deploy new code"
+          mv /home/hostapp/temp_deploy /home/hostapp/React-02
+
+          echo "🔥 Step 7: Clean temp PM2 and restart real backend"
+          pm2 delete temp-mern-backend
+          cd /home/hostapp/React-02/backend
+          pm2 start server.js --name mern-backend
+
+          echo "🌐 Step 8: Deploy frontend to Nginx root"
+          rm -rf /opt/day07/*
+          cp -r /home/hostapp/React-02/frontend/dist/* /opt/day07/
+
+          echo "🔁 Step 9: Restart Nginx"
+          sudo systemctl restart nginx
+
+          echo "✅ CI/CD Deployment Completed Successfully!"
