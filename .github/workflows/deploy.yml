@@ -10,7 +10,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - name: Checkout code
+    - name: Checkout Code
       uses: actions/checkout@v3
 
     - name: Deploy to Ubuntu Server via SSH
@@ -19,10 +19,13 @@ jobs:
         host: ${{ secrets.SERVER_IP }}
         username: ${{ secrets.SERVER_USER }}
         key: ${{ secrets.SERVER_SSH_KEY }}
+        port: 22
+        timeout: 30s
+        command_timeout: 10m
         script: |
           echo "📁 Step 1: Create temp folder and clone"
           rm -rf /home/hostapp/temp_mern_deploy
-          git clone git@github.com:React-Testing/React-02.git /home/hostapp/temp_mern_deploy
+          git clone https://github.com/React-Testing/React-02.git /home/hostapp/temp_mern_deploy
 
           echo "📦 Step 2: Install and run backend temporarily"
           cd /home/hostapp/temp_mern_deploy/backend
