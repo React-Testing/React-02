@@ -6,7 +6,38 @@ on:
       - main
 
 jobs:
-  deploy:
+  ci:
+    name: Continuous Integration
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout Code
+      uses: actions/checkout@v3
+
+    - name: Install Backend Dependencies
+      working-directory: ./backend
+      run: npm install
+
+    - name: Install Frontend Dependencies
+      working-directory: ./frontend
+      run: npm install
+
+    - name: Build Frontend
+      working-directory: ./frontend
+      run: npm run build
+
+    - name: Check Frontend Build Output
+      run: |
+        if [ ! -f frontend/dist/index.html ]; then
+          echo "❌ Frontend build failed"
+          exit 1
+        else
+          echo "✅ Frontend build succeeded"
+        fi
+
+  cd:
+    name: Continuous Deployment
+    needs: ci
     runs-on: ubuntu-latest
 
     steps:
@@ -69,8 +100,6 @@ jobs:
           echo "🌐 Step 8: Deploy frontend to Nginx root"
           sudo rm -rf /opt/day07/*
           sudo cp -r /home/hostapp/React-02/frontend/dist/* /opt/day07/
-          
-
 
           echo "🔁 Step 9: Restart Nginx"
           sudo nginx -t
